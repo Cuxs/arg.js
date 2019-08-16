@@ -12,36 +12,38 @@ var PNF = require('google-libphonenumber').PhoneNumberFormat;
  * @param {string} areaCode area code, default is 11
  * @returns {string} Cleaned phone number
  */
-var clean = function (targetPhone, areaCode) {
-  var defaultCountry = 'AR';
-  areaCode = areaCode || '11';
+const clean = function (targetPhone, areaCode = 11) {
+  const defaultCountry = 'AR';
 
-  var tel;
+  let tel;
   try {
     tel = phoneUtil.parse(targetPhone, defaultCountry);
-    if (tel.getCountryCode() == '54') {
+    if (tel.getCountryCode() === 54) {
       var national = tel.getNationalNumber().toString();
       if (national.length < 10) {
         if (areaCode) {
           return clean(areaCode + national, 'AR');
         }
         else
-          throw "Unknown area code for " + targetPhone;
+          throw new Error(`Unknown area code for ${targetPhone}`);
       }
       else if (national[0] != '9') {
         return clean('+549' + national, 'AR');
       }
+    }else{
+      console.log(tel.getCountryCode());
+      return null;
     }
   }
   catch (error) {
-    throw "Can't parse number " + targetPhone + ": " + error;
+    return `Can't parse number ${targetPhone}: ${error}`;
   }
 
   if (tel) {
     return phoneUtil.format(tel, PNF.E164);
   }
   else {
-    throw "Unknown error."
+    throw new Error("Unknown error.")
   }
 };
 
